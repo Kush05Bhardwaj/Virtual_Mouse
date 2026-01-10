@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 
 class HandTracker:
-    def __init__(self, maxHands=1, detectionCon=0.7, trackCon=0.7):
-        # Download the hand landmarker model
+    def __init__(self, maxHands=1, detectionCon=0.8, trackCon=0.8):
+        # Higher confidence thresholds for more stable tracking
         base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
         options = vision.HandLandmarkerOptions(
             base_options=base_options,
