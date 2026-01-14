@@ -49,7 +49,8 @@ print("Controls:")
 print("  ☝️  Index finger only - Move cursor")
 print("  👆 Thumb + Index - Left click")
 print("  👉 Thumb + Middle - Right click")
-print("  ✌️  Index + Middle - Scroll")
+print("  ✌️  Index + Middle - Scroll DOWN")
+print("  🖖 Middle + Ring - Scroll UP")
 print("  ✊ Fist - Exit")
 
 while True:
@@ -114,11 +115,18 @@ while True:
                 cv2.putText(img, "RIGHT CLICK", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             fist_counter = 0  # Reset fist counter
 
-        # ✌️ Scroll
-        if fingers[1] and fingers[2] and not fingers[0]:
-            pyautogui.scroll(40)
+        # ✌️ Scroll Down (Index + Middle)
+        if fingers[1] and fingers[2] and not fingers[0] and not fingers[3]:
+            pyautogui.scroll(-40)  # Negative = scroll down
             if not HEADLESS_MODE:
-                cv2.putText(img, "SCROLL", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+                cv2.putText(img, "SCROLL DOWN", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+            fist_counter = 0  # Reset fist counter
+
+        # 🖖 Scroll Up (Middle + Ring)
+        elif fingers[2] and fingers[3] and not fingers[0] and not fingers[1]:
+            pyautogui.scroll(40)  # Positive = scroll up
+            if not HEADLESS_MODE:
+                cv2.putText(img, "SCROLL UP", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
             fist_counter = 0  # Reset fist counter
 
         # ❌ Exit (Fist) - must hold for 30 frames to avoid accidental exit (about 1 second)

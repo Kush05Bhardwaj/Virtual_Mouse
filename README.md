@@ -2,16 +2,38 @@
 
 Control your computer mouse using hand gestures! This project uses MediaPipe for hand tracking and PyAutoGUI for mouse control, allowing you to interact with your computer hands-free.
 
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![MediaPipe](https://img.shields.io/badge/MediaPipe-0.10.31-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
+
+---
+
+## 📋 Table of Contents
+
+- [Features](#-features)
+- [Quick Start](#-quick-start)
+- [Hand Gesture Controls](#-hand-gesture-controls)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Project Structure](#-project-structure)
+- [Technical Details](#-technical-details)
+- [Troubleshooting](#-troubleshooting)
+- [License](#-license)
+
 ## ✨ Features
 
-- **Headless Mode**: Run in background without any window (no minimize issues!)
-- **Mouse Movement**: Control cursor with your index finger only
+- **Headless Mode**: Run in background without any window (works when minimized!)
+- **Mouse Movement**: Control cursor with your index finger only (thumb down for precision)
 - **Left Click**: Thumb + Index finger gesture
 - **Right Click**: Thumb + Middle finger gesture  
-- **Scroll**: Index + Middle fingers (no thumb)
+- **Scroll Down**: Index + Middle fingers (no thumb)
+- **Scroll Up**: Middle + Ring fingers (no thumb)
 - **Smart Exit**: Hold fist for 1 second to exit (prevents accidental exits)
 - **Smooth Movement**: Exponential smoothing with configurable sensitivity
 - **Click Debouncing**: Prevents accidental multiple clicks
+- **High Performance**: 30 FPS camera capture with zero-delay mouse control
+- **Debug Mode**: Optional visual feedback for gesture detection
 
 ## 🎮 Hand Gesture Controls
 
@@ -20,24 +42,47 @@ Control your computer mouse using hand gestures! This project uses MediaPipe for
 | ☝️ Index only | `[0,1,0,0,0]` | Move mouse cursor |
 | 👆 Thumb + Index | `[1,1,0,0,0]` | Left click |
 | 👉 Thumb + Middle | `[1,0,1,0,0]` | Right click |
-| ✌️ Index + Middle | `[0,1,1,0,0]` | Scroll down |
+| ✌️ Index + Middle | `[0,1,1,0,0]` | Scroll DOWN |
+| 🖖 Middle + Ring | `[0,0,1,1,0]` | Scroll UP |
 | ✊ Fist (hold 1 sec) | `[0,0,0,0,0]` | Exit application |
 
-**Note:** For mouse movement, ONLY the index finger should be up - all other fingers must be down for precise control.
+**Note:** For mouse movement, ONLY the index finger should be up - all other fingers (including thumb) must be down for precise control.
+
+## 🚀 Quick Start
+
+```powershell
+# Clone the repository
+git clone https://github.com/Kush05Bhardwaj/Virtual_Mouse.git
+cd Virtual_Mouse
+
+# Create and activate virtual environment
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python main.py
+```
+
+**That's it!** Now use hand gestures in front of your webcam to control your mouse. Hold a fist for 1 second to exit.
 
 ## 🚀 Installation
 
 ### Prerequisites
-- Python 3.8 or higher
-- Webcam
-- Windows/Linux/macOS
+- **Python**: 3.8 or higher
+- **Webcam**: Built-in or external USB webcam
+- **Operating System**: Windows 10/11, Linux (Ubuntu 20.04+), or macOS 10.15+
+- **RAM**: Minimum 4GB (8GB recommended for smooth performance)
+- **Processor**: Dual-core CPU (Quad-core recommended)
 
 ### Setup
 
 1. **Clone the repository**
 ```bash
-git clone <your-repo-url>
-cd "Virtual Mouse"
+git clone https://github.com/Kush05Bhardwaj/Virtual_Mouse.git
+cd Virtual_Mouse
 ```
 
 2. **Create a virtual environment**
@@ -99,8 +144,9 @@ The application will start with:
 3. **Use hand gestures** in front of your webcam:
    - Point with **index finger only** to move cursor (keep thumb DOWN!)
    - Extend **thumb + index** to left click
-   - Extend **thumb + middle** to right-click
-   - Extend **index + middle** (no thumb) to scroll
+   - Extend **thumb + middle** to right click
+   - Extend **index + middle** (no thumb) to scroll DOWN
+   - Extend **middle + ring** (no thumb) to scroll UP
    - Make a **fist and hold for 1 second** to exit
 
 4. **Exit** by holding a fist for 1 second or press **Ctrl+C** in terminal
@@ -149,101 +195,26 @@ Virtual Mouse/
 1. **Camera Capture**: Captures 30 FPS video from webcam using OpenCV
 2. **Hand Detection**: MediaPipe detects hand landmarks (21 key points) using new tasks API
 3. **Gesture Recognition**: Analyzes finger positions to identify gestures
+   - Finger array format: `[Thumb, Index, Middle, Ring, Pinky]`
+   - `1` = finger extended/up, `0` = finger folded/down
+   - Example: `[0,1,0,0,0]` = Only index finger is up
 4. **Coordinate Mapping**: Maps camera coordinates to screen coordinates with boundary checking
 5. **Smoothing**: Applies exponential smoothing for fluid cursor movement
 6. **Mouse Control**: Translates gestures to mouse actions via PyAutoGUI with zero delay
 
-### Configuration
+#### Finger Detection Logic
 
-**In `main.py`:**
-
-```python
-# Modes
-HEADLESS_MODE = True    # True = no window (works in background)
-DEBUG_MODE = False      # True = show finger detection status
-
-# Camera
-wCam, hCam = 640, 480   # Camera resolution
-frameR = 100            # Frame reduction (boundary margin in pixels)
-
-# Movement
-smoothening = 5         # Mouse smoothness (3-7: lower = faster, higher = smoother)
-
-# Debouncing
-click_cooldown = 10     # Frames between clicks (prevent double-click)
-fist_counter = 30       # Frames to hold fist for exit (~1 second)
+The system uses a 5-element array to represent finger states:
+```
+[Thumb, Index, Middle, Ring, Pinky]
+   0      1      2       3      4
 ```
 
-**In `hand_tracker.py`:**
-```python
-detectionCon=0.8        # Detection confidence threshold (0.0-1.0)
-trackCon=0.8           # Tracking confidence threshold (0.0-1.0)
-maxHands=1             # Maximum hands to detect
-```
-
-### API Changes
-
-This project uses **MediaPipe 0.10.31** with the new **tasks API**. Key differences from older versions:
-- ✅ Uses `mediapipe.tasks.python.vision` instead of `mediapipe.solutions`
-- ✅ Custom drawing with OpenCV instead of MediaPipe drawing utilities
-- ✅ `HandLandmarker` instead of deprecated `Hands` class
-- ✅ Video mode for continuous frame processing
-
-## 🐛 Troubleshooting
-
-### Mouse movement is inverted/reversed
-✅ **Fixed!** The latest version has correct movement mapping.
-- Move hand right → cursor moves right
-- Move hand left → cursor moves left
-
-### Can't move mouse with index finger
-- Make sure **ONLY the index finger is up**
-- Keep thumb, middle, ring, and pinky fingers **DOWN**
-- Try adjusting detection confidence in `hand_tracker.py`
-
-### Program exits immediately / unexpectedly
-✅ **Fixed!** Updated to require holding fist for 1 full second.
-- Fist counter resets when performing other gestures
-- Won't exit if no hand is detected
-- Only exits after 30 consecutive frames (~1 second) of fist
-
-### Window minimizes and stops working
-✅ **Fixed!** Use headless mode (default).
-- Set `HEADLESS_MODE = True` in `main.py` (line 8)
-- No window to minimize - works completely in background
-
-### Camera not detected
-- Ensure webcam is connected and not used by another application
-- Try changing camera index in `main.py`: `cap = cv2.VideoCapture(1)` (or 2, 3, etc.)
-- Check camera permissions in Windows Settings
-
-### Hand not detected / tracking unstable
-- Ensure **good lighting** - bright, even light works best
-- Keep hand within camera frame and at arm's length
-- Try lowering detection confidence: `detectionCon=0.7` in `hand_tracker.py`
-- Avoid cluttered backgrounds
-
-### Mouse movement too fast/slow
-- Adjust `smoothening` in `main.py`:
-  - Lower (3-4) = faster, more responsive
-  - Higher (6-8) = slower, smoother
-- Default is 5 (balanced)
-
-### Import errors / MediaPipe AttributeError
-✅ **Fixed!** Migrated to new MediaPipe API.
-- Ensure virtual environment is activated
-- Reinstall dependencies: `pip install -r requirements.txt`
-- Uses MediaPipe 0.10.31 with tasks API
-
-### PyScreeze version issues
-✅ **Fixed!** Pinned to compatible version.
-- Project uses `pyscreeze==0.1.30`
-- If issues: `pip install --force-reinstall pyscreeze==0.1.30`
-
-### Accidental clicks
-- Click cooldown is set to 10 frames
-- Make gestures deliberately and hold briefly
-- Increase `click_cooldown` in `main.py` for more delay
+- **Position 0 (Thumb)**: `1` if thumb is extended, `0` if folded
+- **Position 1 (Index)**: `1` if index finger is extended, `0` if folded
+- **Position 2 (Middle)**: `1` if middle finger is extended, `0` if folded
+- **Position 3 (Ring)**: `1` if ring finger is extended, `0` if folded
+- **Position 4 (Pinky)**: `1` if pinky is extended, `0` if folded
 
 ## 📝 License
 
@@ -258,29 +229,65 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 💡 Tips for Best Performance
 
 1. **Lighting**: Use bright, even lighting for best hand detection
+   - Natural daylight works best
+   - Avoid backlighting (light behind you)
+   - Face a light source if possible
 2. **Camera Position**: Place camera at eye level, arm's length away
+   - Keep hand within the camera frame
+   - Maintain consistent distance from camera
 3. **Background**: Plain, uncluttered background improves tracking
+   - Avoid busy patterns or moving objects
+   - Solid-colored walls work great
 4. **Hand Position**: Keep hand flat and facing camera
+   - Palm should face the camera
+   - Fingers should be clearly visible and separated
 5. **Gestures**: Make deliberate, clear gestures - hold briefly
-6. **Headless Mode**: Use headless mode to avoid window management issues
+   - Avoid rapid hand movements
+   - Pause between gestures for better recognition
+6. **Headless Mode**: Use headless mode (default) to avoid window management issues
+   - No performance impact from rendering
+   - Works seamlessly when switching applications
+7. **System Resources**: Close unnecessary applications for better performance
+   - Virtual Mouse uses ~5-10% CPU on modern systems
+   - Ensure webcam drivers are up to date
 
 ## 🚀 Future Improvements
 
-- [ ] Add double-click gesture
-- [ ] Implement drag-and-drop functionality
-- [ ] Add scroll speed control
-- [ ] Support for two-handed gestures
-- [ ] Add gesture customization config file
-- [ ] System tray icon for easy control
+- [ ] Add double-click gesture (e.g., quick tap motion)
+- [ ] Implement drag-and-drop functionality (pinch and move)
+- [ ] Add configurable scroll speed control
+- [ ] Support for two-handed gestures (multi-hand operations)
+- [ ] Add gesture customization via config file
+- [ ] System tray icon for easy control and status
 - [ ] Voice command integration
+- [ ] Add volume control gestures
+- [ ] Support for custom keybindings
+- [ ] Add gesture recording and playback
 
 ## ⚠️ Disclaimer
 
 This tool is for educational and accessibility purposes. Use responsibly and be aware of system requirements when automating mouse control.
 
----
+## 🤝 Contributing
 
-**Made with ❤️ using Python, MediaPipe, and OpenCV**
+Contributions are welcome! Here's how you can help:
+
+1. **Fork the repository**
+2. **Create a feature branch** (`git checkout -b feature/AmazingFeature`)
+3. **Commit your changes** (`git commit -m 'Add some AmazingFeature'`)
+4. **Push to the branch** (`git push origin feature/AmazingFeature`)
+5. **Open a Pull Request**
+
+### Areas for Contribution
+
+- Bug fixes and performance improvements
+- New gesture recognition patterns
+- Cross-platform compatibility improvements
+- Documentation and tutorials
+- UI/UX enhancements
+- Test coverage
+
+---
 
 **Author:** Kush05Bhardwaj  
 **Repository:** [Virtual_Mouse](https://github.com/Kush05Bhardwaj/Virtual_Mouse)
