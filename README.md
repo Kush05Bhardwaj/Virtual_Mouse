@@ -29,6 +29,7 @@ Control your computer mouse using hand gestures! This project uses MediaPipe for
 - **Right Click**: Thumb + Middle finger gesture  
 - **Scroll Down**: Index + Middle fingers (no thumb)
 - **Scroll Up**: Middle + Ring fingers (no thumb)
+- **🆕 Quick Launch**: Open hand gesture to launch multiple URLs, folders, and apps instantly!
 - **Smart Exit**: Hold fist for 1 second to exit (prevents accidental exits)
 - **Smooth Movement**: Exponential smoothing with configurable sensitivity
 - **Click Debouncing**: Prevents accidental multiple clicks
@@ -44,9 +45,53 @@ Control your computer mouse using hand gestures! This project uses MediaPipe for
 | 👉 Thumb + Middle | `[1,0,1,0,0]` | Right click |
 | ✌️ Index + Middle | `[0,1,1,0,0]` | Scroll DOWN |
 | 🖖 Middle + Ring | `[0,0,1,1,0]` | Scroll UP |
+| 🖐️ Open hand (all 5 fingers) | `[1,1,1,1,1]` | **Quick Launch** URLs, folders & apps |
 | ✊ Fist (hold 1 sec) | `[0,0,0,0,0]` | Exit application |
 
 **Note:** For mouse movement, ONLY the index finger should be up - all other fingers (including thumb) must be down for precise control.
+
+### 🚀 Quick Launch Feature
+
+The **open hand gesture** (all 5 fingers extended) allows you to instantly launch multiple URLs, folders, and applications with a single gesture!
+
+**Default Configuration:**
+- **5 URLs**: GitHub profile, ChatGPT, LinkedIn, YouTube, Gmail
+- **1 Folder**: Your Projects folder (F:\)
+- **2 Apps**: Task Manager, VS Code
+
+**Customization:**
+
+Edit the configuration in `main.py` (lines 15-29) to add your favorite items:
+
+```python
+# Open Hand Gesture Configuration
+URLS = [
+    "https://github.com/Kush05Bhardwaj",
+    "https://chatgpt.com/",
+    "https://www.linkedin.com/in/kush2012bhardwaj",
+    "https://www.youtube.com",
+    "https://mail.google.com/mail/u/0/#inbox"
+]
+
+FOLDERS = [
+    r"F:\Projects",
+    r"C:\Users\YourName\Documents",  # Add more folders
+]
+
+APPS = [
+    "taskmgr",      # Task Manager
+    "code",         # VS Code
+    "notepad",      # Add more apps
+    "calc",         # Calculator
+]
+```
+
+**Features:**
+- ✅ Opens all URLs in browser tabs simultaneously
+- ✅ Opens folders in Windows Explorer
+- ✅ Launches applications
+- ✅ 2-second cooldown prevents accidental re-triggering
+- ✅ Fully customizable - add as many items as you want!
 
 ## 🚀 Quick Start
 
@@ -67,6 +112,8 @@ python main.py
 ```
 
 **That's it!** Now use hand gestures in front of your webcam to control your mouse. Hold a fist for 1 second to exit.
+
+**Pro Tip:** Show an open hand (all 5 fingers) to instantly launch your configured URLs, folders, and apps! Edit the `URLS`, `FOLDERS`, and `APPS` lists in `main.py` to customize what opens.
 
 ## 🚀 Installation
 
@@ -147,6 +194,7 @@ The application will start with:
    - Extend **thumb + middle** to right click
    - Extend **index + middle** (no thumb) to scroll DOWN
    - Extend **middle + ring** (no thumb) to scroll UP
+   - Show **open hand (all 5 fingers)** to launch your configured URLs, folders, and apps
    - Make a **fist and hold for 1 second** to exit
 
 4. **Exit** by holding a fist for 1 second or press **Ctrl+C** in terminal
@@ -253,6 +301,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🚀 Future Improvements
 
+- [x] ~~Quick launch apps and URLs with hand gesture~~ ✅ **Implemented!**
 - [ ] Add double-click gesture (e.g., quick tap motion)
 - [ ] Implement drag-and-drop functionality (pinch and move)
 - [ ] Add configurable scroll speed control

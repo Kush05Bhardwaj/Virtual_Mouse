@@ -4,10 +4,31 @@ import pyautogui
 from hand_tracker import HandTracker
 from utils import fingers_up
 import sys
+import subprocess
+import os
+import webbrowser
 
 # Configuration
 HEADLESS_MODE = True  # Set to True to run without showing the window (WORKS WHEN MINIMIZED!)
 DEBUG_MODE = False  # Show finger detection status (only works with window)
+
+# Open Hand Gesture Configuration - URLs, Folders, and Apps to open
+URLS = [
+    "https://github.com/Kush05Bhardwaj",
+    "https://chatgpt.com/",
+    "https://www.linkedin.com/in/kush2012bhardwaj",
+    "https://www.youtube.com",
+    "https://mail.google.com/mail/u/0/#inbox"
+]
+
+FOLDERS = [
+    r"F:"
+]
+
+APPS = [
+    "taskmgr",  # Task Manager
+    "code",     # VS Code (if in PATH)
+]
 
 # Camera settings
 wCam, hCam = 640, 480
@@ -23,11 +44,48 @@ clocX, clocY = 0, 0
 # Click debouncing
 click_cooldown = 0
 right_click_cooldown = 0
+app_launch_cooldown = 0  # Cooldown for app launching
 fist_counter = 0  # Count frames with fist to avoid accidental exit
 
 # PyAutoGUI settings for smoother movement
 pyautogui.FAILSAFE = False  # Disable failsafe for smoother movement
 pyautogui.PAUSE = 0  # Remove delay between PyAutoGUI calls
+
+def launch_open_hand_actions():
+    """Launch all URLs, open all folders, and start all apps when open hand is detected"""
+    success_count = 0
+    
+    # Open all URLs
+    for url in URLS:
+        try:
+            webbrowser.open(url)
+            print(f"\n✅ Opened URL: {url}")
+            success_count += 1
+        except Exception as e:
+            print(f"\n❌ Failed to open URL {url}: {e}")
+    
+    # Open all folders
+    for folder in FOLDERS:
+        try:
+            if os.path.exists(folder):
+                os.startfile(folder)
+                print(f"\n✅ Opened folder: {folder}")
+                success_count += 1
+            else:
+                print(f"\n⚠️ Folder not found: {folder}")
+        except Exception as e:
+            print(f"\n❌ Failed to open folder {folder}: {e}")
+    
+    # Launch all apps
+    for app in APPS:
+        try:
+            subprocess.Popen(app, shell=True)
+            print(f"\n✅ Launched app: {app}")
+            success_count += 1
+        except Exception as e:
+            print(f"\n❌ Failed to launch app {app}: {e}")
+    
+    return success_count > 0
 
 cap = cv2.VideoCapture(0)
 cap.set(3, wCam)
@@ -51,6 +109,7 @@ print("  👆 Thumb + Index - Left click")
 print("  👉 Thumb + Middle - Right click")
 print("  ✌️  Index + Middle - Scroll DOWN")
 print("  🖖 Middle + Ring - Scroll UP")
+print(f"  🖐️  Open hand (all fingers) - Open {len(URLS)} URLs, {len(FOLDERS)} folders & {len(APPS)} apps")
 print("  ✊ Fist - Exit")
 
 while True:
@@ -129,6 +188,15 @@ while True:
                 cv2.putText(img, "SCROLL UP", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
             fist_counter = 0  # Reset fist counter
 
+        # 🖐️ Open Hand - Launch URLs & Folders (all 5 fingers up)
+        elif fingers == [1,1,1,1,1] and app_launch_cooldown == 0:
+            success = launch_open_hand_actions()
+            if success:
+                app_launch_cooldown = 60  # Cooldown for 2 seconds (60 frames)
+                if not HEADLESS_MODE:
+                    cv2.putText(img, "OPENING URLS & FOLDERS", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            fist_counter = 0  # Reset fist counter
+
         # ❌ Exit (Fist) - must hold for 30 frames to avoid accidental exit (about 1 second)
         if fingers == [0,0,0,0,0]:
             fist_counter += 1
@@ -151,6 +219,8 @@ while True:
         click_cooldown -= 1
     if right_click_cooldown > 0:
         right_click_cooldown -= 1
+    if app_launch_cooldown > 0:
+        app_launch_cooldown -= 1
 
     # Show mode indicator
     cv2.putText(img, "Virtual Mouse Active", (10, hCam - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
